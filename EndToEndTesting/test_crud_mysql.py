@@ -44,14 +44,14 @@ def test_login():
 def test_create_item(test_login):
     token = test_login
     
-    item_data = CreateItemRequest(
-        name="Test Item",
-        description="This is a test item",
-        price=19.99
-    )
+    item_data = {
+        "name": "Test Item",
+        "description": "This is a test item",
+        "price": 19.99
+    }
     
     response = requests.post(f'{BASE_URL}/create_item',
-                             json=item_data.model_dump(), 
+                             json=item_data, 
                              headers={'Authorization': f'Bearer {token}'})
 
     json_data = response.json()
@@ -64,9 +64,9 @@ def test_create_item(test_login):
     # Validate response using ItemResponse Pydantic model
     item = ItemResponse(**item_data_from_response)
     
-    assert item.name == item_data.name
-    assert item.description == item_data.description
-    assert item.price == item_data.price
+    assert item.name == item_data['name']
+    assert item.description == item_data['description']
+    assert item.price == item_data['price']
 
 
 
@@ -87,20 +87,34 @@ def test_create_item_invalid_data(test_login):
     assert 'Invalid data' in json_data['message']
     assert 'price' in json_data['errors'][0]['loc']
 
+# Edge test case: Empty request body
+def test_create_item_empty_body(test_login):
+    token = test_login
+    
+    response = requests.post(f'{BASE_URL}/create_item',
+                             json={},  # Empty body
+                             headers={'Authorization': f'Bearer {token}'})
+    
+    assert response.status_code == 400  # Bad Request
+    json_data = response.json()
+    assert 'message' in json_data
+    assert json_data['message'] == 'Invalid data'
+
+
 
 #-------------------------------------------------- Update Item -------------------------------------------------#
 
 def test_update_item(test_login):
     token = test_login
 
-    item_data = CreateItemRequest(
-        name="Test Item",
-        description="This is a test item",
-        price=19.99
-    )
+    item_data = {
+        "name": "Test Item",
+        "description": "This is a test item",
+        "price": 19.99
+    }
     
     create_response = requests.post(f'{BASE_URL}/create_item', 
-                                  json=item_data.model_dump(), 
+                                  json=item_data, 
                                   headers={'Authorization': f'Bearer {token}'})
 
 
@@ -110,14 +124,14 @@ def test_update_item(test_login):
     
     item_id = json_data['item']['id']
 
-    updated_data = UpdateItemRequest(
-        name="Updated Test Item",
-        description="This is the updated description",
-        price=25.99
-    )
+    updated_data = {
+        "name": "Updated Test Item",
+        "description": "This is the updated description",
+        "price": 25.99
+    }
 
     update_response = requests.put(f'{BASE_URL}/update_item/{item_id}', 
-                                 json=updated_data.model_dump(), 
+                                 json=updated_data, 
                                  headers={'Authorization': f'Bearer {token}'})
 
 
@@ -133,21 +147,21 @@ def test_update_item(test_login):
     assert get_response.status_code == 200
     # Validate the response using the ItemResponse model
     item = ItemResponse(**json_get_data)
-    assert item.name == updated_data.name
-    assert item.description == updated_data.description
-    assert item.price == updated_data.price
+    assert item.name == updated_data['name']
+    assert item.description == updated_data['description']
+    assert item.price == updated_data['price']
 
 def test_update_item_invalid_data(test_login):
     token = test_login
 
-    item_data = CreateItemRequest(
-        name="Test Item",
-        description="This is a test item",
-        price=19.99
-    )
+    item_data = {
+        "name": "Test Item",
+        "description": "This is a test item",
+        "price": 19.99
+    }
     
     create_response = requests.post(f'{BASE_URL}/create_item', 
-                                  json=item_data.model_dump(), 
+                                  json=item_data, 
                                   headers={'Authorization': f'Bearer {token}'})
 
 
@@ -180,13 +194,13 @@ def test_update_item_invalid_data(test_login):
 def test_get_items(test_login):
     token = test_login
 
-    item_data = CreateItemRequest(
-        name="Test Item",
-        description="This is a test item",
-        price=19.99
-    )
+    item_data = {
+        "name": "Test Item",
+        "description": "This is a test item",
+        "price": 19.99
+    }
     create_response = requests.post(f'{BASE_URL}/create_item', 
-                                  json=item_data.model_dump(),
+                                  json=item_data,
                                   headers={'Authorization': f'Bearer {token}'})
 
 
@@ -209,13 +223,13 @@ def test_get_items(test_login):
 def test_get_item_by_id(test_login):
     token = test_login
 
-    item_data = CreateItemRequest(
-        name="Test Item",
-        description="This is a test item",
-        price=19.99
-    )
+    item_data = {
+        "name": "Test Item",
+        "description": "This is a test item",
+        "price": 19.99
+    }
     create_response = requests.post(f'{BASE_URL}/create_item', 
-                                  json=item_data.model_dump(),
+                                  json=item_data,
                                   headers={'Authorization': f'Bearer {token}'})
 
 
@@ -232,9 +246,9 @@ def test_get_item_by_id(test_login):
 
     assert get_response.status_code == 200
     assert item.id == item_id
-    assert item.name == item_data.name
-    assert item.description == item_data.description
-    assert item.price == item_data.price
+    assert item.name == item_data['name']
+    assert item.description == item_data['description']
+    assert item.price == item_data['price']
 
 # Test for getting a single item by an invalid ID (item does not exist)
 def test_get_item_by_invalid_id(test_login):
@@ -253,13 +267,14 @@ def test_get_item_by_invalid_id(test_login):
 # Test for deleting an existing item
 def test_delete_item(test_login):
     token = test_login
-    item_data = CreateItemRequest(
-        name="Test Item",
-        description="This is a test item",
-        price=19.99
-    )
+
+    item_data = {
+        "name": "Test Item",
+        "description": "This is a test item",
+        "price": 19.99
+    }
     create_response = requests.post(f'{BASE_URL}/create_item', 
-                                  json=item_data.model_dump(),
+                                  json=item_data,
                                   headers={'Authorization': f'Bearer {token}'})
 
 
