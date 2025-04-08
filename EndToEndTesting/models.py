@@ -5,6 +5,7 @@ class CreateItemRequest(BaseModel):
     name: str = Field(..., min_length=3, max_length=100)
     description: str = Field(..., min_length=3)
     price: float = Field(..., ge=0)
+    created_at: Optional[str] = None
 
 class UpdateItemRequest(BaseModel):
     name: str = Field(None, min_length=3, max_length=100)
@@ -16,7 +17,7 @@ class ItemResponse(BaseModel):
     name: str
     description: str
     price: float
-    created_at: str  # ISO 8601 Date String (e.g., '2023-10-07T13:45:00')
+    created_at: Optional[str] = None  # ISO 8601 Date String (e.g., '2023-10-07T13:45:00')
 
 class GetAllItems(BaseModel):
     items: List[ItemResponse]
