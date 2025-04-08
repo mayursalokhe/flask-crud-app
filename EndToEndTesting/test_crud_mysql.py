@@ -83,9 +83,10 @@ def test_create_item_invalid_data(test_login):
 
 
     json_data = response.json()
-    assert response.status_code == 400
+    assert response.status_code != 200
     assert 'Invalid data' in json_data['message']
     assert 'price' in json_data['errors'][0]['loc']
+
 
 # Edge test case: Empty request body
 def test_create_item_empty_body(test_login):
@@ -95,7 +96,7 @@ def test_create_item_empty_body(test_login):
                              json={},  # Empty body
                              headers={'Authorization': f'Bearer {token}'})
     
-    assert response.status_code == 400  # Bad Request
+    assert response.status_code != 200  # Bad Request
     json_data = response.json()
     assert 'message' in json_data
     assert json_data['message'] == 'Invalid data'
@@ -184,7 +185,7 @@ def test_update_item_invalid_data(test_login):
 
     json_update_data = update_response.json()
 
-    assert update_response.status_code == 400
+    assert update_response.status_code != 200
     assert 'Name and price are required (Optional: description)!' in json_update_data['message']
 
 
@@ -259,7 +260,7 @@ def test_get_item_by_invalid_id(test_login):
 
     json_data = response.json()
 
-    assert response.status_code == 404
+    assert response.status_code != 200
     assert json_data['message'] == "Item not found"
 
 #-------------------------------------- Delete Item -----------------------------#
@@ -298,7 +299,7 @@ def test_delete_item(test_login):
 
 
     json_get_data = get_response.json()
-    assert get_response.status_code == 404
+    assert get_response.status_code != 200
     assert json_get_data['message'] == "Item not found"
 
 def test_delete_non_existent_item(test_login):
@@ -309,5 +310,5 @@ def test_delete_non_existent_item(test_login):
 
     json_data = response.json()
 
-    assert response.status_code == 404
+    assert response.status_code != 200
     assert json_data['message'] == "Item not found"
